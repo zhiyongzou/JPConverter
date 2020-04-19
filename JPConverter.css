@@ -1,0 +1,62 @@
+/*
+//
+//  JPConverter.css
+//
+//  Created by zzyong on 2020/03/20.
+//  Copyright © 2020 zzyong. All rights reserved.
+//
+*/
+
+body {
+    margin: 0px;
+    background-color: white;
+}
+
+.jp_topbar_container {
+    height: 160px;
+    border-bottom: 1px solid #ddd;
+    border-top: 1px solid #ddd;
+    background-color: rgb(245, 245, 245);
+}
+
+.jp_topbar_content {
+    margin-left: 70px;
+    width: calc(100% - 140px);
+    height: 50%;
+    display: flex;
+    align-items: center;
+}
+
+.jp_code_container {
+    margin-left: 70px;
+    margin-right: 70px;
+    margin-top: -80px;
+    text-align: left;
+}
+
+.jp_code_textview {
+    resize: none;
+    padding: 10px;
+    font-size: 13px;
+    text-align: left;
+    background-color: rgb(35, 38, 46);
+    color: white;
+    border-radius: 5px;
+    width: calc(50% - 25px);/* https://osvaldas.info/imitating-calc-fallback-fixed-width-sidebar-in-responsive-layout */
+    height: 350px;
+}
+
+.jp_json_color {
+    color: rgb(227, 57, 66);
+}
+
+.converter_btn {
+    margin-top: 20px;
+    background-color: orange;
+    border-radius: 5px;
+    width: 100px;
+    height: 40px;
+    color: white;
+    text-align: center;
+    font-size: 18px;
+}
