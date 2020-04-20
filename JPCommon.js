@@ -14,9 +14,10 @@ let JPRightSquareBracket    = "]";
 let JPIfKey                 = "if";
 var JPAspectDefineClass     = [];
 var JPConditionIndex        = 0;
+var JPAspectLocalInstance   = [];
 
 // JPFormatCondition
-function JPFormatCondition(JSParseLocalInstanceList, condition)
+function JPFormatCondition(aspectMessages, JSParseLocalInstanceList, condition)
 {
   condition = condition.trim();
   // 替换 YES
@@ -37,6 +38,13 @@ function JPFormatCondition(JSParseLocalInstanceList, condition)
 
   if (JPInstance == null) {
     return condition;
+  }
+
+  if (JPAspectLocalInstance.indexOf(condition) == -1) {
+    let msg = JPAspectMessage();
+    msg.message = condition + "=" + String(JPInstance["type"]) + ":" + JPInstance["value"];
+    msg["messageType"] = 2;
+    aspectMessages.push(msg);
   }
 
   if (JPInstance["type"] == 3) {
@@ -95,6 +103,14 @@ function JPOperator(condition)
 
   if (condition.indexOf("!=") != -1) {
     return "!=";
+  }
+
+  if (condition.indexOf("&&") != -1) {
+    return "&&";
+  }
+
+  if (condition.indexOf("||") != -1) {
+    return "||";
   }
 
   return null;
@@ -188,8 +204,7 @@ function JPRemoveObjectiveCStatementUnuseWhiteSpace(statement)
 function JPAspectMessage() 
 {
     var aspectMessage = {
-        message: "",
-        messageType: 0
+        message: ""
     };
     return aspectMessage;
 }

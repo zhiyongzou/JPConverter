@@ -6,7 +6,7 @@
 //  Copyright © 2020 zzyong. All rights reserved.
 //
 
-// 解析点语法语句
+// 解析赋值语句
 function parseAssignStatement(JSParseLocalInstanceList, statement)
 {
   var aspectMessage = JPAspectMessage();
@@ -21,7 +21,8 @@ function parseAssignStatement(JSParseLocalInstanceList, statement)
 
     let JSParseInstance = JSParseLocalInstanceList[argumentValue];
     if (typeof JSParseInstance == "object") {
-      aspectMessage["arguments"] = JPArgument(0, JSParseInstance["type"], JSParseInstance["value"]);
+      aspectMessage["arguments"] = {};
+      aspectMessage.arguments[settter] = [JPArgument(0, JSParseInstance["type"], JSParseInstance["value"])];
     } else {
       JPAlert("[ " + statement + " ] ==> " + argumentValue + " 参数类型未定义，请指定该参数类型");
       return null;
@@ -58,37 +59,32 @@ function parseAssignStatement(JSParseLocalInstanceList, statement)
 
       aspectMessage["message"] = varValue;
       aspectMessage["localInstanceKey"] = localInstanceKey;
+      JPAspectLocalInstance.push(localInstanceKey);
       JSParseLocalInstanceList[localInstanceKey] = JSParseInstance(varType, localInstanceKey);
 
     }  else {
-      // 条件语句
-      if (JPOperator(varValue) != null) {
-        varValue = JPFormatCondition(JSParseLocalInstanceList, varValue);
-        return JPInvokeCondition(localInstanceKey, varValue);
-      } else {
-        var argumentValue = null;
-        if (varValue.substring(0,1) == "@") {
+      var argumentValue = null;
+      if (varValue.substring(0,1) == "@") {
 
-          if (varValue.indexOf("(") != -1 || varValue.indexOf("\"") != -1) {
-            argumentValue = varValue.substring(2, varValue.length - 1);
-          } else {
-            argumentValue = varValue.substring(1);
-          }
+        if (varValue.indexOf("(") != -1 || varValue.indexOf("\"") != -1) {
+          argumentValue = varValue.substring(2, varValue.length - 1);
         } else {
-  
-          if (varValue == "YES") {
-            argumentValue = "1";
-          } else if (varValue == "NO") {
-            argumentValue = "0";
-          } else {
-            argumentValue = varValue;
-          }
+          argumentValue = varValue.substring(1);
         }
-  
-        JSParseLocalInstanceList[localInstanceKey] = JSParseInstance(varType, argumentValue);
-        // 解析局部变量，无需加入到脚本
-        return null;
+      } else {
+
+        if (varValue == "YES") {
+          argumentValue = "1";
+        } else if (varValue == "NO") {
+          argumentValue = "0";
+        } else {
+          argumentValue = varValue;
+        }
       }
+
+      JSParseLocalInstanceList[localInstanceKey] = JSParseInstance(varType, argumentValue);
+      // 解析局部变量，无需加入到脚本
+      return null;
     }
   }
 
@@ -99,7 +95,7 @@ function parseAssignStatement(JSParseLocalInstanceList, statement)
 function parseReturnStatement(JSParseLocalInstanceList, returnType, statement)
 {
   var aspectMessage = JPAspectMessage();
-  aspectMessage.messageType = 1;
+  aspectMessage["messageType"] = 1;
 
   if (statement == JPReturnKey) {
     aspectMessage.message = JPReturnKey;
@@ -131,6 +127,7 @@ function parseObjectiveCMethod(JSParseLocalInstanceList, localInstanceKey, state
 
   if (localInstanceKey != null && localInstanceKey.length > 0) {
     aspectMessage["localInstanceKey"] = localInstanceKey;
+    JPAspectLocalInstance.push(localInstanceKey);
   }
 
   // 移除 [
@@ -150,7 +147,9 @@ function parseObjectiveCMethod(JSParseLocalInstanceList, localInstanceKey, state
     if (index == 0) {
       let whiteSpaceIdx = statementComponent.indexOf(" ");
       let firstTarget = statementComponent.substring(0, whiteSpaceIdx);
-      if (firstTarget != "self" && firstTarget != "super" && JSParseLocalInstanceList[firstTarget] == null) {
+      if (firstTarget != "self" && firstTarget != "super" && 
+          (firstTarget.indexOf(".") == -1) &&  JSParseLocalInstanceList[firstTarget] == null) {
+
         if (JPAspectDefineClass.indexOf(firstTarget) == -1) {
           JPAspectDefineClass.push(firstTarget);
         }
@@ -196,13 +195,14 @@ function parseObjectiveCMethod(JSParseLocalInstanceList, localInstanceKey, state
         selArguments.push(JPArgument(index, argumentType, argumentValue));
       }
     }
-    JPMessage = JPMessage + "." + statementComponent.trim();
+    statementComponent = statementComponent.trim();
+    JPMessage = JPMessage + "." + statementComponent;
     
     if (selArguments.length > 0) {
       if (aspectMessage.arguments == null) {
         aspectMessage["arguments"] = {};
       }
-      aspectMessage.arguments[JPMessage] = selArguments;
+      aspectMessage.arguments[statementComponent] = selArguments;
     }
   }
   aspectMessage.message = JPMessage;

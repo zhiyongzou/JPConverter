@@ -9,6 +9,7 @@
 function didConverterButtonClick() 
 {
   JPAspectDefineClass = [];
+  JPAspectLocalInstance = [];
   JPConditionIndex = 0;
 
   var objcCodeTextView = document.getElementById('jp_objc_code_textview');
@@ -135,6 +136,7 @@ function addClassAcpset(className, isClassMethod, returnType, methodString, Aspe
       let argumentName = element.substring(colonIdx + 1).trim();
       if (argumentName.length > 0) {
         selArgumentNames.push(argumentName);
+        JPAspectLocalInstance.push(argumentName);
       }
     }
     if (selArgumentNames.length > 0) {
@@ -255,14 +257,54 @@ function parseIfStatement(aspectMessages, JSParseLocalInstanceList, returnType, 
   var ifCondition = statement.substring(statement.indexOf("(") + 1, statement.indexOf(")")).trim();
   var conditionKey = null;
   
-  ifCondition = JPFormatCondition(JSParseLocalInstanceList, ifCondition);
-  if (JPOperator(ifCondition) != null) {
-    conditionKey = "conditionKey_" + String(JPConditionIndex);
+  let orOperatorIdx = ifCondition.indexOf("||");
+  let andOperatorIdx = ifCondition.indexOf("&&");
+  if(orOperatorIdx != -1) {
+    let conditions = ifCondition.split("||");
+    for (let index = 0; index < conditions.length; index++) {
+      var element = conditions[index];
+      let tempCnd = JPFormatCondition(aspectMessages, JSParseLocalInstanceList, element);
+      if (JPOperator(tempCnd) != null) {
+        let tempKey = "jpif_" + String(JPConditionIndex);
+         aspectMessages.push(JPInvokeCondition(tempKey, tempCnd));
+         JPConditionIndex ++;
+         ifCondition = ifCondition.replace(element, tempKey);
+      } else {
+        JPAlert(element + ": 变量未定义");
+      }
+    }
+    conditionKey = "jpif_" + String(JPConditionIndex);
     aspectMessages.push(JPInvokeCondition(conditionKey, ifCondition));
     JPConditionIndex ++;
+
+  } else if (andOperatorIdx != -1) {
+    let conditions = ifCondition.split("&&");
+    for (let index = 0; index < conditions.length; index++) {
+      var element = conditions[index];
+      let tempCnd = JPFormatCondition(aspectMessages, JSParseLocalInstanceList, element);
+      if (JPOperator(tempCnd) != null) {
+        let tempKey = "jpif_" + String(JPConditionIndex);
+         aspectMessages.push(JPInvokeCondition(tempKey, tempCnd));
+         JPConditionIndex ++;
+         ifCondition = ifCondition.replace(element, tempKey);
+      } else {
+        JPAlert(element + ": 变量未定义");
+      }
+    }
+    conditionKey = "jpif_" + String(JPConditionIndex);
+    aspectMessages.push(JPInvokeCondition(conditionKey, ifCondition));
+    JPConditionIndex ++;
+
   } else {
-    JPAlert(ifCondition + ": 必须指定运算符");
-    return;
+    ifCondition = JPFormatCondition(aspectMessages, JSParseLocalInstanceList, ifCondition);
+    if (JPOperator(ifCondition) != null) {
+      conditionKey = "jpif_" + String(JPConditionIndex);
+      aspectMessages.push(JPInvokeCondition(conditionKey, ifCondition));
+      JPConditionIndex ++;
+    } else {
+      JPAlert(ifCondition + ": 判断条件无运算符 (>, >=, ==, < , <= , ||, &&)");
+      return;
+    }
   }
 
   let methodStatements = ifImpString.split(";");
