@@ -18,7 +18,7 @@ JPConverter 是 OC 转 json patch 工具。首先在 Xcode 编写好对应的代
 @end
 ```
 
-### OC方法必须指定其参数类型
+### OC方法除了 self, nil, YES, NO 外， 其他参数必须指定类型
 ```objc
 // error
 self.view.backgroundColor = [UIColor redColor];
@@ -56,31 +56,25 @@ if (animated) {
   }
 }
 ```
-#### 判断条件
-* 判断条件除了局部变量、YES、 NO、 nil，必须指定类型
+#### 判断条件支持以下格式
+
 ```objc
-// error
-if (rows>=12) {
- 
+if (hidden == NO) {
 }
 
-// right
-NSUInteger numberOfRows = 12;
-if (rows>=numberOfRows) {
- 
-}
-// right
 if (hidden) {
- 
-}
-// right
-if (!animated) {
- 
 }
 
-// right
+if (!animated) {
+}
+
+if (rows>0) {
+}
+
 if (view) {
- 
+}
+
+if (view != nil) {
 }
 ```
 
