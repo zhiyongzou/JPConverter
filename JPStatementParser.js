@@ -72,14 +72,7 @@ function parseAssignStatement(JSParseLocalInstanceList, statement)
           argumentValue = varValue.substring(1);
         }
       } else {
-
-        if (varValue == "YES") {
-          argumentValue = "1";
-        } else if (varValue == "NO") {
-          argumentValue = "0";
-        } else {
-          argumentValue = varValue;
-        }
+        argumentValue = varValue;
       }
 
       JSParseLocalInstanceList[localInstanceKey] = JSParseInstance(varType, argumentValue);
@@ -101,19 +94,12 @@ function parseReturnStatement(JSParseLocalInstanceList, returnType, statement)
     aspectMessage.message = JPReturnKey;
   } else {
     let returnValue = statement.replace(JPReturnKey, "").trim();
-    if (returnValue == "YES") {
-      aspectMessage.message = JPReturnKey + "=" + String(returnType) + ":1";
-    } else if(returnValue == "NO") {
-      aspectMessage.message = JPReturnKey + "="  + String(returnType) + ":0";
+    let JSParseInstance = JSParseLocalInstanceList[returnValue];
+    if (typeof JSParseInstance == "object") {
+      aspectMessage.message = JPReturnKey + "=" + String(returnType) + ":" + JSParseInstance["value"];
     } else {
-
-      let JSParseInstance = JSParseLocalInstanceList[returnValue];
-      if (typeof JSParseInstance == "object") {
-        aspectMessage.message = JPReturnKey + "=" + String(returnType) + ":" + JSParseInstance["value"];
-      } else {
-        JPAlert("[ " + statement + " ] ==> " + returnValue + " 参数类型未定义，请指定该参数类型");
-        return null;
-      }
+      JPAlert("[ " + statement + " ] ==> " + returnValue + " 参数类型未定义，请指定该参数类型");
+      return null;
     }
   }
 
@@ -174,25 +160,16 @@ function parseObjectiveCMethod(JSParseLocalInstanceList, localInstanceKey, state
         // 移除 :
         argument = argument.substring(1).trim();
 
-        let argumentType = 0;
-        let argumentValue = "";
-        
-        if (argument == "self") {
-          argumentType = 1;
-          argumentValue = argument;
+        let JSParseInstance = JSParseLocalInstanceList[argument];
+        if (typeof JSParseInstance == "object") {
+
+          let argumentValue = JSParseInstance["value"];
+          let argumentType = JSParseInstance["type"];
+          selArguments.push(JPArgument(index, argumentType, argumentValue));
+
         } else {
-
-          let JSParseInstance = JSParseLocalInstanceList[argument];
-          if (typeof JSParseInstance == "object") {
-
-            argumentValue = JSParseInstance["value"];
-            argumentType = JSParseInstance["type"];
-
-          } else {
-            JPAlert("[ " + statement + " ] ==> " + argument + " 参数类型未定义，请指定该参数类型");
-          }
+          JPAlert("[ " + statement + " ] ==> " + argument + " 参数类型未定义，请指定该参数类型");
         }
-        selArguments.push(JPArgument(index, argumentType, argumentValue));
       }
     }
     statementComponent = statementComponent.trim();

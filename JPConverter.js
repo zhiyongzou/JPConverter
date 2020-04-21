@@ -99,7 +99,12 @@ function addClassAcpset(className, isClassMethod, returnType, methodString, Aspe
   }
 
   // JS解析使用到的所有局部变量
-  var JSParseLocalInstanceList = {};
+  var JSParseLocalInstanceList = {
+    "self": JSParseInstance(1, "self"),
+    "NO": JSParseInstance(3, "0"),
+    "YES": JSParseInstance(3, "1"),
+    "nil": JSParseInstance(1, "nil")
+  };
   var classAcpset = JPClassAspect(className, isClassMethod);
   // { 位置
   let firstOpenBraceIdx = methodString.indexOf("{");
