@@ -191,6 +191,11 @@ function JPRemoveObjectiveCStatementUnuseWhiteSpace(statement)
     tempStatement = tempStatement.replace(/\s*\.\s*/igm, ".");
   }
 
+  // 移除 , 前后空格
+  if (tempStatement.indexOf(",") != -1) {
+    tempStatement = tempStatement.replace(/\s*,\s*/igm, ",");
+  }
+
   return tempStatement;
 }
 
@@ -222,9 +227,13 @@ function JPClassAspect(className, isClassMethod)
     var classAcpset = {
         className: className,
         selName: "",
-        isClassMethod: isClassMethod,
         hookType: 1,
     };
+
+    if (isClassMethod == true) {
+      classAcpset["isClassMethod"] = isClassMethod;
+    }
+
     return classAcpset;
 }
 

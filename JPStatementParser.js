@@ -55,7 +55,7 @@ function parseAssignStatement(JSParseLocalInstanceList, statement)
       aspectMessage = parseObjectiveCMethod(JSParseLocalInstanceList, localInstanceKey, varValue);
       JSParseLocalInstanceList[localInstanceKey] = JSParseInstance(varType, localInstanceKey);
 
-    } else if (varValue.indexOf(".") != -1) {
+    } else if (varValue.indexOf(".") != -1 && varValue.indexOf(",") == -1) {
 
       aspectMessage["message"] = varValue;
       aspectMessage["localInstanceKey"] = localInstanceKey;
@@ -64,9 +64,13 @@ function parseAssignStatement(JSParseLocalInstanceList, statement)
 
     }  else {
       var argumentValue = null;
-      if (varValue.substring(0,1) == "@") {
+      let rightBracketIdx = varValue.indexOf("(");
 
-        if (varValue.indexOf("(") != -1 || varValue.indexOf("\"") != -1) {
+      if (rightBracketIdx != -1) {
+        argumentValue = varValue.substring(rightBracketIdx + 1, varValue.length - 1);
+
+      } else  if (varValue.substring(0,1) == "@") {
+        if (varValue.indexOf("\"") != -1) {
           argumentValue = varValue.substring(2, varValue.length - 1);
         } else {
           argumentValue = varValue.substring(1);

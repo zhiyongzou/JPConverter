@@ -37,12 +37,17 @@
     
     <div class="jp_code_container">
         <textarea class="jp_code_textview" id="jp_objc_code_textview" onkeydown="keydownHandler(this)">
-@implementation AppDelegate
+@implementation ViewController
 
-- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
+- (void)viewWillAppear:(BOOL)animated
 {
-    return YES;
+    BOOL isHidden = self.view.isHidden;
+    if (!isHidden) {
+        UIColor *redColor = [UIColor redColor];
+        self.view.backgroundColor = redColor;
+    }
 }
+
 @end
         </textarea>
         <textarea class="jp_code_textview jp_json_color" id="jp_json_code_textview" readonly></textarea>
